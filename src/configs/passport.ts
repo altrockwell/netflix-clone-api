@@ -1,6 +1,10 @@
 import { PassportStatic } from 'passport';
+import { VerifyCallback } from 'passport-google-oauth2';
 const LocalStrategy = require('passport-local').Strategy;
+const GoogleStrategy = require('passport-google-oauth2').Strategy;
 import bcrypt from 'bcrypt';
+import { Request } from 'express';
+
 export default function initialize(
 	passport: PassportStatic,
 	getUserByEmail: any,
@@ -29,8 +33,30 @@ export default function initialize(
 	passport.use(
 		new LocalStrategy({ usernameField: 'email' }, authenticateUser)
 	);
-	passport.serializeUser((user: any, done) => done(null, user.id));
-	passport.deserializeUser((id, done) => {
-		return done(null, getUserById(id));
+
+	passport.use(
+		new GoogleStrategy(
+			{
+				clientID: process.env.GOOGLE_CLIENT_ID,
+				clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+				callbackURL: 'http://localhost:8000/auth/google/callback',
+				passReqToCallback: true,
+			},
+			function (
+				request: Request,
+				accessToken: string,
+				refreshToken: string,
+				profile: any,
+				done: VerifyCallback
+			) {
+				return done(null, profile);
+			}
+		)
+	);
+	passport.serializeUser((user: any, done: VerifyCallback) =>
+		done(null, user)
+	);
+	passport.deserializeUser((user: any, done: VerifyCallback) => {
+		return done(null, user);
 	});
 }

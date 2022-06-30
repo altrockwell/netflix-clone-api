@@ -5,6 +5,7 @@ export default async function checkAuth(
 	res: Response,
 	next: NextFunction
 ) {
+	console.log('Is Authenticated ', req.isAuthenticated());
 	if (req.isAuthenticated()) {
 		return next();
 	}
