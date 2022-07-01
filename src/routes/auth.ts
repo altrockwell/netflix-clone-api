@@ -1,11 +1,7 @@
-import express, { NextFunction, Request, Response } from 'express';
+import express from 'express';
 import passport from 'passport';
-import bcrypt from 'bcrypt';
-
-import { IUser } from '../interfaces/user';
 import checkNotAuth from '../middlewares/checkNotAuth';
-import checkAuth from '../middlewares/checkAuth';
-import { users } from '../index';
+import { register } from '../controllers/auth';
 const router = express.Router();
 
 router.get(
@@ -39,20 +35,20 @@ router.post(
 router.get('/register', checkNotAuth, (req, res) => {
 	res.render('register.ejs');
 });
+
+// POST /register returns 201 status and {name, email}
+
+// Return 400 if name is not provided
+// Return 400 if email is not provided
+// Return 400 if provider is "local" and password is not provided
+// Check if password is hashed
+// Return 400 if email is already exist in db
+// Return 201 if request is validate
+// Save user in the DB
+// Return user
+
 router.post('/register', async (req, res) => {
-	try {
-		const hashedPassword = await bcrypt.hash(req.body.password, 10);
-		const user = {
-			id: Date.now().toString(),
-			name: req.body.name,
-			email: req.body.email,
-			password: hashedPassword,
-		};
-		users.push(user);
-		res.redirect('/login');
-	} catch (error) {
-		res.redirect('/register');
-	}
+	// should return 400 when name
 });
 
 router.delete('/logout', function (req, res, next) {

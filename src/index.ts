@@ -3,31 +3,33 @@ import middlewares from './startapp/middlewares';
 import user from './routes/user';
 import auth from './routes/auth';
 import checkAuth from './middlewares/checkAuth';
+const path = require('path');
 import { IUser } from './interfaces/user';
-import { VerifyCallback } from 'passport-google-oauth2';
-
-require('dotenv').config();
-
-// Project Modules
-
+import connectDB from './startapp/db';
 const app = express();
-const port = process.env.PORT || 3000;
 
-export const users: IUser[] = [];
+require('dotenv').config({
+	path: path
+		.join(__dirname, '..', `${app.get('env')}.env`)
+		.split(' ')
+		.join(''),
+});
 
 // middlewares
-middlewares(app, users);
+middlewares(app);
 
 app.get('/', checkAuth, (req, res) => {
 	const user = req.user as IUser | any;
 	console.log(user);
-	// const name = typeof user.name == String ? user.name : user.displayName
 	res.render('index.ejs', { name: user.displayName || user.name });
 });
 
+// routes
 app.use('/', auth);
 app.use('/users', user);
 
-app.listen(port, () => {
-	console.log(`Server connected to ${port}...`);
-});
+console.log('env: ', process.env.NODE_ENV);
+
+connectDB(app);
+
+export default app;

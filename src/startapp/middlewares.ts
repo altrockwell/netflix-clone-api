@@ -7,13 +7,10 @@ import methodOverride from 'method-override';
 import passportConfig from '../configs/passport';
 
 import { IUser } from '../interfaces/user';
+import User from '../models/user';
 
-export default function middlewares(app: Application, users: IUser[]) {
-	passportConfig(
-		passport,
-		(email: string) => users.find((user) => user.email === email),
-		(id: string) => users.find((user) => user.id === id)
-	);
+export default function middlewares(app: Application) {
+	passportConfig(passport);
 	app.use(express.json());
 	app.use(express.urlencoded({ extended: false }));
 	app.set('view-engine', 'ejs');

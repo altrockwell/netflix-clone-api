@@ -1,55 +1,25 @@
-import express, { NextFunction, Request, Response } from 'express';
-import passport from 'passport';
-import bcrypt from 'bcrypt';
-
+import express from 'express';
 import { IUser } from '../interfaces/user';
-import checkNotAuth from '../middlewares/checkNotAuth';
 import checkAuth from '../middlewares/checkAuth';
-import { users } from '../index';
+import User from '../models/user';
 const router = express.Router();
 
-router.get('/', checkAuth, (req, res) => {
-	const user = req.user as IUser;
-	res.render('index.ejs', { name: user.name });
-});
-
-router.get('/login', checkNotAuth, (req, res) => {
-	res.render('login.ejs');
-});
-router.post(
-	'/login',
-	passport.authenticate('local', {
-		successRedirect: '/',
-		failureRedirect: '/users/login',
-		failureFlash: true,
-	})
-);
-router.get('/register', checkNotAuth, (req, res) => {
-	res.render('register.ejs');
-});
-router.post('/register', async (req, res) => {
+router.get('/', async (req, res) => {
 	try {
-		const hashedPassword = await bcrypt.hash(req.body.password, 10);
-		const user = {
-			id: Date.now().toString(),
-			name: req.body.name,
-			email: req.body.email,
-			password: hashedPassword,
-		};
-		users.push(user);
-		res.redirect('/users/login');
+		const users = await User.find({});
+		res.status(200).json(users);
 	} catch (error) {
-		res.redirect('/users/register');
+		res.status(500).json({ message: error });
 	}
 });
 
-router.delete('/logout', function (req, res, next) {
-	req.logOut(function (err) {
-		if (err) {
-			return next(err);
-		}
-		res.redirect('/users/login');
-	});
+router.get('/me', checkAuth, (req, res) => {
+	const user = req.user as IUser | any;
+	res.send(`Hi ${user.displayName || user.name}`);
+});
+
+router.get('/delete', async (req, res) => {
+	await User.deleteMany({});
 });
 
 export default router;

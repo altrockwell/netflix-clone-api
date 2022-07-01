@@ -10,5 +10,5 @@ export default async function checkAuth(
 		return next();
 	}
 	// res.status(400).send('Not Logged In');
-	res.redirect('/users/login');
+	res.redirect('/login');
 }
